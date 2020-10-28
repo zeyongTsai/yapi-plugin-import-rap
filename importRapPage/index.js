@@ -104,83 +104,80 @@ class ImportRap extends Component {
     return res_body
   }
 
-  addInterface(pageList, catid){
-    pageList.forEach(j=>{
-      let fName = j.name && j.name!=='某页面' ? `[${j.name}] - ` : ''
-      j.actionList.forEach( t => {
-        if(t.requestUrl){
-          let rm = t.requestType === '1' ? 'GET' : t.requestType === '2' ? 'POST' : t.requestType === '3' ? 'PUT' : 'DELETE'
-          let createParams = {
-            catid,
-            method: rm,
-            path: t.requestUrl[0]=='/' ? t.requestUrl : `/${t.requestUrl}`,
-            project_id: this.props.match.params.id,
-            title: `${fName}${t.name}`
-          }
-          axios.post('/api/interface/add',createParams).then(res3 => {
-            if(res3.data.errcode !== 0){
-              message.error(`插入${fName}${t.name}失败: ${res3.data.errmsg}`);
-              console.error(`插入${fName}${t.name}失败: ${res3.data.errmsg}`);
-              return false
-            }
-            let interface_id = res3.data.data._id
-            let req_query = []
-            let req_body_other = {
-              properties: {},
-              required: [],
-              title: "empty object",
-              type: "object"
-            }
-            if(rm === 'GET') {
-              t.requestParameterList.forEach( rp => {
-                req_query.push({
-                  desc: rp.name,
-                  example: rp.remark.replace('@mock=','').replace(/[\'\"]/g,''),
-                  name: rp.identifier,
-                  required: "1"
-                })
-              })
-            } else {
-              req_body_other = this.formatDeep(t.requestParameterList)
-            }
-
-            let res_body = this.formatDeep(t.responseParameterList)
-
-            let upparams = Object.assign({
-              api_opened: false,
-              catid: '',
-              desc: '',
-              id: interface_id,
-              markdown: '',
-              method: '',
-              path: '',
-              req_body_form: [],
-              req_body_is_json_schema: true,
-              req_body_other: rm === 'GET' ? undefined : JSON5.stringify(req_body_other),
-              req_body_type: rm === 'GET' ? undefined : 'json',
-              req_headers: rm === 'GET' ? [] : [{name: "Content-Type", value: "application/json"}],
-              req_params: [],
-              req_query: rm === 'GET' ? req_query : undefined,
-              res_body: JSON5.stringify(res_body),
-              res_body_is_json_schema: true,
-              res_body_type: 'json',
-              status: 'done',
-              switch_notice: true,
-              tag: [],
-              title: ''
-            }, createParams)
-            delete upparams.project_id
-            axios.post('/api/interface/up', upparams).then(upres => {
-              if(upres.data.errcode === 0){
-                message.success(`插入接口${fName}${t.name}成功`);
-              } else {
-                message.error(`插入接口${fName}${t.name}失败: ${upres.data.errmsg}`)
-                console.error(`插入接口${fName}${t.name}失败: ${upres.data.errmsg}`)
-              }
-            })
-          })
+  addInterface(actionList, catid){
+    actionList.forEach( t => {
+      if(t.requestUrl){
+        let rm = t.requestType === '1' ? 'GET' : t.requestType === '2' ? 'POST' : t.requestType === '3' ? 'PUT' : 'DELETE'
+        let createParams = {
+          catid,
+          method: rm,
+          path: t.requestUrl[0]=='/' ? t.requestUrl : `/${t.requestUrl}`,
+          project_id: this.props.match.params.id,
+          title: `${t.name}`
         }
-      })
+        axios.post('/api/interface/add',createParams).then(res3 => {
+          if(res3.data.errcode !== 0){
+            message.error(`插入${t.name}失败: ${res3.data.errmsg}`);
+            console.error(`插入${t.name}失败: ${res3.data.errmsg}`);
+            return false
+          }
+          let interface_id = res3.data.data._id
+          let req_query = []
+          let req_body_other = {
+            properties: {},
+            required: [],
+            title: "empty object",
+            type: "object"
+          }
+          if(rm === 'GET') {
+            t.requestParameterList.forEach( rp => {
+              req_query.push({
+                desc: rp.name,
+                example: rp.remark.replace('@mock=','').replace(/[\'\"]/g,''),
+                name: rp.identifier,
+                required: "1"
+              })
+            })
+          } else {
+            req_body_other = this.formatDeep(t.requestParameterList)
+          }
+
+          let res_body = this.formatDeep(t.responseParameterList)
+
+          let upparams = Object.assign({
+            api_opened: false,
+            catid: '',
+            desc: '',
+            id: interface_id,
+            markdown: '',
+            method: '',
+            path: '',
+            req_body_form: [],
+            req_body_is_json_schema: true,
+            req_body_other: rm === 'GET' ? undefined : JSON5.stringify(req_body_other),
+            req_body_type: rm === 'GET' ? undefined : 'json',
+            req_headers: rm === 'GET' ? [] : [{name: "Content-Type", value: "application/json"}],
+            req_params: [],
+            req_query: rm === 'GET' ? req_query : undefined,
+            res_body: JSON5.stringify(res_body),
+            res_body_is_json_schema: true,
+            res_body_type: 'json',
+            status: 'done',
+            switch_notice: true,
+            tag: [],
+            title: ''
+          }, createParams)
+          delete upparams.project_id
+          axios.post('/api/interface/up', upparams).then(upres => {
+            if(upres.data.errcode === 0){
+              message.success(`插入接口${t.name}成功`);
+            } else {
+              message.error(`插入接口${t.name}失败: ${upres.data.errmsg}`)
+              console.error(`插入接口${t.name}失败: ${upres.data.errmsg}`)
+            }
+          })
+        })
+      }
     })
   }
 
@@ -196,25 +193,51 @@ class ImportRap extends Component {
       message.error(res.data.errmsg||'[请检查projectID是否存在]')
       return false
     }
- 
-    res.data.data.moduleList.forEach( e=> {
-      let moduleName = (e.name == '' || e.name=='某模块（点击编辑后双击修改）') ? res.data.data.name : e.name
-      axios.post('/api/interface/add_cat', {
-        desc: moduleName,
-        name: moduleName,
-        project_id
-      }).then(res2 => {
-        if(res2.data.errcode === 0){
-          message.success(`新增接口分类[${moduleName}]成功`);
-          let catid = res2.data.data._id
-          this.addInterface(e.pageList, catid)
-        } else {
-          message.error(res2.data.errmsg)
-        }
-        
+
+    // 递归创建分类目录
+    const createCats = (cats, parent_id) => {
+      cats.forEach(cat => {
+        axios.post('/api/interface/add_cat', {
+          desc: cat.desc,
+          name: cat.name,
+          parent_id: parent_id || 0,
+          project_id
+        }).then(res2 => {
+          if(res2.data.errcode === 0){
+            message.success(`新增接口分类[${cat.name}]成功`);
+            let catid = res2.data.data._id
+            if (cat.pageList) {
+              createCats(cat.pageList, catid)
+            } else if (cat.actionList) {
+              this.addInterface(cat.actionList, catid)
+            }
+          } else {
+            message.error(res2.data.errmsg)
+          }
+          
+        })
       })
-      
-    })
+    }
+
+    // 将rap的 moduleList 以及内部的 pageList 都展开成为目录，再对 pageList 里面的 actionList 上传
+    let cats = []
+    res.data.data.moduleList.forEach( e => {
+      let moduleName = (e.name == '' || e.name=='某模块（点击编辑后双击修改）') ? res.data.data.name : e.name
+      let cat = {
+        name: moduleName,
+        desc: e.introduction || moduleName
+      }
+      cat.pageList = (e.pageList || []).map(page => {
+        return {
+          name: page.name,
+          desc: page.introduction || page.name,
+          actionList: page.actionList || []
+        }
+      })
+      cats.push(cat)
+    });
+
+    createCats(cats);
   }
 
   render() {

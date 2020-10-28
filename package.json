@@ -1,8 +1,8 @@
 {
   "key": "yapi-plugin",
-  "name": "yapi-plugin-import-custom-rap",
+  "name": "yapi-plugin-import-rap-multi-level-folder",
   "version": "0.1.0",
-  "description": "a yapi plugin for import projects from rap1",
+  "description": "a yapi plugin for import projects from rap1, support multi level folder",
   "main": "index.js",
   "keywords": [
     "yapi",
@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wxxcarl/yapi-plugin-import-rap.git"
+    "url": "git+https://github.com/zeyongTsai/yapi-plugin-import-rap.git"
   },
   "scripts": {
     "dev": "node index.js"
