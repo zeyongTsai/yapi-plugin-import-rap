@@ -1,12 +1,12 @@
 
-# yapi-plugin-import-rap
+# yapi-plugin-import-rap-multi-level-folder
 
 1. `yapi plugin --name yapi-plugin-import-rap-multi-level-folder`
 
 2. 在config.json中新增插件配置
     <pre>
     "plugins": [{
-        "name": "import-rap",
+        "name": "import-rap-multi-level-folder",
         "options": {
             "rapOrigin": "http://192.168.1.100:8000" // rap项目地址
         }
