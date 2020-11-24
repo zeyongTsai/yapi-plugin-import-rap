@@ -1,7 +1,7 @@
 {
   "key": "yapi-plugin",
   "name": "yapi-plugin-import-rap-multi-level-folder",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "a yapi plugin for import projects from rap1, support multi level folder",
   "main": "index.js",
   "keywords": [

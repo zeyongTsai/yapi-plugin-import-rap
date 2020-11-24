@@ -3,7 +3,7 @@ import axios from 'axios'
 import React, { PureComponent as Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Input, message } from 'antd';
+import { Input, Checkbox, message } from 'antd';
 import JSON5 from 'json5';
 
 const Search = Input.Search;
@@ -17,11 +17,52 @@ const Search = Input.Search;
 class ImportRap extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      logs: [],
+      checkedOptions: ['success', 'error']
+    }
+    this.logOptions = [
+      { label: 'success', value: 'success' },
+      { label: 'error', value: 'error' }
+    ]
   }
   static propTypes = {
     match: PropTypes.object,
     projectId: PropTypes.string
   };
+
+  onChange (checkedValues) {
+    console.log(checkedValues)
+    this.setState({
+      checkedOptions: checkedValues
+    })
+  };
+  clearLogs () {
+    this.setState({
+      logs: []
+    }, () => {
+      const node = this.refs.logBox
+      node.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+      })
+    })
+  }
+  pushLog (log) {
+    this.setState({
+      logs: [...this.state.logs, log]
+    }, () => {
+      const node = this.refs.logBox
+      if (node) {
+        node.scrollTo({
+          top: 10000000,
+          left: 0,
+          behavior: 'smooth'
+        })
+      }
+    })
+  }
 
   formatDeep(key) {
     let res_body = {
@@ -119,6 +160,10 @@ class ImportRap extends Component {
           if(res3.data.errcode !== 0){
             message.error(`插入${t.name}失败: ${res3.data.errmsg}`);
             console.error(`插入${t.name}失败: ${res3.data.errmsg}`);
+            this.pushLog({
+              type: 'error',
+              info: `插入${t.name}失败: ${res3.data.errmsg}`
+            })
             return false
           }
           let interface_id = res3.data.data._id
@@ -171,9 +216,17 @@ class ImportRap extends Component {
           axios.post('/api/interface/up', upparams).then(upres => {
             if(upres.data.errcode === 0){
               message.success(`插入接口${t.name}成功`);
+              this.pushLog({
+                type: 'success',
+                info: `插入接口${t.name}成功`
+              })
             } else {
               message.error(`插入接口${t.name}失败: ${upres.data.errmsg}`)
               console.error(`插入接口${t.name}失败: ${upres.data.errmsg}`)
+              this.pushLog({
+                type: 'error',
+                info: `插入接口${t.name}失败: ${upres.data.errmsg}`
+              })
             }
           })
         })
@@ -205,6 +258,10 @@ class ImportRap extends Component {
         }).then(res2 => {
           if(res2.data.errcode === 0){
             message.success(`新增接口分类[${cat.name}]成功`);
+            this.pushLog({
+              type: 'success',
+              info: `新增接口分类[${cat.name}]成功`
+            })
             let catid = res2.data.data._id
             if (cat.pageList) {
               createCats(cat.pageList, catid)
@@ -213,6 +270,10 @@ class ImportRap extends Component {
             }
           } else {
             message.error(res2.data.errmsg)
+            this.pushLog({
+              type: 'error',
+              info: res2.data.errmsg
+            })
           }
           
         })
@@ -253,17 +314,40 @@ class ImportRap extends Component {
               onSearch={id => this.importFromRap(id)}
               />
           </div>
-          <div className="rap-help">
-            <h3>* Project Id：</h3>
-            <p>在RAP中点入项目之后，查看浏览器地址栏中的“projectId=”</p>
-            <br />
-            <h3>* 导入的文件夹：</h3>
-            <p>
-              导入之后以接口的模块建立文件夹，即RAP进入项目后内容区域右上角的Tab
-            </p>
-            <br />
-            <h3>* 接口名称前缀：</h3>
-            <p>如果RAP项目中接口列表有分多个group，则在接口名称前面添加group名称</p>
+          <div className="rap-content">
+            <div className="rap-help">
+              <h3>* Project Id：</h3>
+              <p>在RAP中点入项目之后，查看浏览器地址栏中的“projectId=”</p>
+              <br />
+              <h3>* 导入的文件夹：</h3>
+              <p>
+                导入之后以接口的模块建立文件夹，即RAP进入项目后内容区域右上角的Tab
+              </p>
+              <br />
+              <h3>* 接口名称前缀：</h3>
+              <p>如果RAP项目中接口列表有分多个group，则在接口名称前面添加group名称</p>
+            </div>
+            <div className="rap-log">
+              <div className="rap-log__title">
+                导入日志
+                <Checkbox.Group
+                  style={{verticalAlign:'bottom'}}
+                  options={this.logOptions}
+                  defaultValue={this.state.checkedOptions}
+                  onChange={values => this.onChange(values)}
+                />
+                <span onClick={() => this.clearLogs()}>clear</span>
+              </div>
+              <div className="rap-log__content" ref="logBox">
+                {
+                  this.state.logs.filter(item => {
+                    return this.state.checkedOptions.indexOf(item.type) > -1
+                  }).map((item,index) => {
+                    return <div className={item.type} key={index}>{item.info}</div>
+                  }) 
+                }
+              </div>
+            </div>
           </div>
         </section>
       </div>

@@ -11,12 +11,57 @@
     }
 }
 
+
+.rap-content {
+    display: flex;
+}
 .rap-help{
     padding: 40px 10px 0;
     color: #999;
-    
+    flex-grow: 1;
     h3{
         float: left;
         color: #999;
+    }
+}
+.rap-log {
+    color: #999;
+    width: 500px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding: 0 10px;
+    font-size: 12px;
+    border: 1px solid #F0F0F0;
+    &__title {
+        margin: 0 -10px;
+        border-bottom: 1px solid #F0F0F0;
+        line-height: 2;
+        font-size: 14px;
+        text-indent: 10px;
+        span {
+            float: right;
+            font-size: 12px;
+            padding: 2px 5px 0;
+            cursor: pointer;
+            color: #aaa;
+            &:hover {
+                color: #606266;
+            }
+        }
+    }
+    &__content {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    & div.error {
+        color: #FF4D4F;
+        line-height: 20px;
+        word-break: break-all;
+    }
+    & div.success {
+        color: #52C41A;
+        line-height: 20px;
+        word-break: break-all;
     }
 }
